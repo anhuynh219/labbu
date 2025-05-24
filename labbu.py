@@ -1,7 +1,11 @@
 import sys, os, re
 import mytextgrid
+import tgt
+from tgt.core import IntervalTier
 import yaml
 from ftfy import fix_text as fxy
+import tgt
+from tgt.core import IntervalTier
 from pathlib import Path
 
 class labbu:
@@ -129,12 +133,12 @@ class labbu:
 	#code referenced from the amazing HAI-D (overdramatic on github)
 	def load_lab_from_textgrid(self, fpath, silence='SP', breath='AP'):
 		self.lab = []
-		tg = mytextgrid.read_from_file(fpath)
+		tg = tgt.read_textgrid(fpath)
 		for tier in tg:
-			if tier.name == 'phones' and tier.is_interval():
-				for interval in tier:
-					time_start = int(float(interval.xmin)*10000000)
-					time_end = int(float(interval.xmax)*10000000)
+			if tier.name in ['音素', 'phones'] and isinstance(tier, IntervalTier):
+				for interval in tier.intervals:
+					time_start = int(float(interval.start_time)*10000000)
+					time_end = int(float(interval.end_time)*10000000)
 					label = interval.text
 					if label == '':
 						label = silence
@@ -142,7 +146,7 @@ class labbu:
 						label = breath
 					self.lab.append({'phone': label,'start': time_start,'end': time_end})
 		return self.lab
-
+		
 	# debug/reference to print the phoneme dictionary.
 	def validate_phonemes(self):
 		print('PHONE - TYPE\n')
